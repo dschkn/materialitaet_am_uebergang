@@ -11,6 +11,10 @@ if(portFromEnvironment.notNil, {
 Server.default = Server.local;
 s = Server.default;
 
+// This work listens to system telemetry, not microphone audio.
+// Disabling input also avoids mismatched input/output sample rates.
+s.options.numInputBusChannels = 0;
+
 s.waitForBoot({
     SynthDef(\materialityBed, {
         |out = 0, cpu = 0.2, memory = 0.4, load = 0.2,
