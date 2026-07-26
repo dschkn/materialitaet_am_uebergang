@@ -1,5 +1,7 @@
 # Materialität am Übergang
 
+![Gilbert Simondon, Aristotle, and SuperCollider code](media/materialitaet-transition-hero.webp)
+
 A process-based composition in which a laptop listens to its own internal
 activity and turns the conditions of computation into sound.
 
@@ -32,13 +34,11 @@ Requirements:
 - Node.js 18 or newer
 - SuperCollider 3
 
-Clone the repository, enter its directory, and switch to the finished prototype
-branch:
+Clone the repository and enter its directory:
 
 ```bash
 git clone git@github.com:dschkn/materialitaet_am_uebergang.git
 cd materialitaet_am_uebergang
-git switch prototype/system-listening-v0.1
 ```
 
 Check that Node.js and SuperCollider are available:
@@ -59,7 +59,6 @@ any time to stop both the telemetry bridge and SuperCollider cleanly.
 To update an existing local copy before launching it:
 
 ```bash
-git switch prototype/system-listening-v0.1
 git pull
 npm run doctor
 npm start
