@@ -3,12 +3,25 @@
 A process-based composition in which a laptop listens to its own internal
 activity and turns the conditions of computation into sound.
 
-The original idea behind this project belongs to my dear friend and colleague
-[Luis Maximilian Küffner](https://github.com/user4-33), whose
-*Materialität am Übergang* provided its theoretical and artistic point of
-departure. I wrote this repository as my own version on top of his work: an
-independent extension and reinterpretation for live system telemetry and
-SuperCollider.
+The original idea behind this project belongs to my very dear friend and
+colleague [Luis Maximilian Küffner](https://github.com/user4-33), whose
+bachelor's report *Materialität am Übergang* provides its theoretical and
+artistic point of departure.
+
+In this work, Küffner reflects on a broader understanding of composition.
+Rather than reducing a work to material placed under a pre-existing form, he
+understands it as an evolving constellation of all the forces involved in its
+becoming: material properties and resistance, formal decisions, technical
+systems, temporal processes, perception, environment, and the actions of the
+composer. To develop this view, he contrasts Aristotle's hylomorphic model with
+Gilbert Simondon's theory of individuation. Form is no longer simply imposed on
+passive matter; it emerges through the interaction of heterogeneous conditions.
+
+This perspective led me to develop my own version on top of Küffner's work in
+SuperCollider. Here, the computer is treated not only as a neutral tool, but as
+part of the material itself: the program listens to its internal processes,
+displays them live in the terminal, and turns their changing conditions into
+sound.
 
 **Version and implementation: [dschkn](https://github.com/dschkn)**
 
@@ -147,3 +160,14 @@ Version 0.1 is complete. It is a self-contained composition prototype with
 one-command launch, live telemetry, OSC communication, a SuperCollider sound
 engine, a terminal dashboard, session recording, and automated tests for the
 Node.js bridge.
+
+## Authorship and copyright
+
+The original report *Materialität am Übergang*, its text, and Küffner's original
+examples remain © Luis Maximilian Küffner.
+
+The software implementation in this repository, terminal interface,
+system-sonification design, sound engine, and accompanying documentation are
+© 2026 Dmitrii Shchukin ([dschkn](https://github.com/dschkn)).
+
+Each author retains copyright in their respective original contribution.
