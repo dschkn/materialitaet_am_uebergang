@@ -1,0 +1,17 @@
+{
+  "name": "materialitaet-am-uebergang",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A process-based composition for system telemetry and SuperCollider.",
+  "author": "dschkn",
+  "scripts": {
+    "start": "node bridge/index.js",
+    "doctor": "node bridge/doctor.js",
+    "telemetry": "node bridge/index.js --no-audio",
+    "smoke": "node bridge/index.js --no-audio --samples 2 --interval 250 --no-record",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
