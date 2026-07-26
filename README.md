@@ -36,6 +36,11 @@ SCLANG_PATH="/path/to/sclang" npm start
 
 Keep the output volume low on the first run.
 
+While the piece runs, the terminal becomes a live dashboard. It shows the raw
+machine state and the sounding processes produced from it: drone and hum
+frequencies, click density, noise brightness, active voices, pulse, drift, and
+recent structural changes.
+
 ## What happens
 
 The Node.js bridge measures CPU activity, memory, system load, process count,
@@ -46,12 +51,17 @@ SuperCollider uses those conditions to shape a field of behaviours:
 
 | Machine condition | Sound behaviour |
 |---|---|
-| Available CPU headroom | Number of active voices |
-| Memory use | Register and spectral brightness |
-| System load | Detuning and resonance relation |
-| Running processes | Event density |
-| Battery | Slow pulse |
-| Telemetry lag | Irregular drift |
+| Available CPU headroom | Population of resonant sine voices |
+| Memory use | Low drone register and noise brightness |
+| System load | Subharmonic beating and resonance relation |
+| Running processes | Density of clicks and noise brightness |
+| Battery | Slow amplitude pulse |
+| Telemetry lag | Irregular frequency drift |
+
+The first prototype deliberately keeps the vocabulary small: low sine pairs,
+a subharmonic hum, filtered rumble, pink-noise rustle, short resonant clicks,
+and quiet sine objects. The mappings are continuous, so the sound field changes
+without turning every telemetry sample into a new note.
 
 The crucial relation is circular. SuperCollider and `scsynth` contribute to
 the CPU activity that the bridge measures. When the machine has headroom, the

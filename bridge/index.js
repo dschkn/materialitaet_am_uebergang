@@ -5,7 +5,12 @@ const dgram = require("node:dgram");
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
-const { TelemetrySampler, clamp } = require("./telemetry");
+const { TelemetrySampler } = require("./telemetry");
+const {
+  TerminalDashboard,
+  engineStatusFromLine,
+  formatStatus,
+} = require("./dashboard");
 const { sendOscMessage } = require("./osc");
 const { findSclang } = require("./sclang");
 
@@ -89,26 +94,23 @@ function sessionFileName() {
   return `${new Date().toISOString().replace(/[:.]/g, "-")}.jsonl`;
 }
 
-function formatPercent(value) {
-  return `${Math.round(clamp(value) * 100)
-    .toString()
-    .padStart(3)}%`;
+function createLineReader(onLine) {
+  let pending = "";
+
+  return (chunk) => {
+    pending += chunk.toString("utf8");
+    const lines = pending.split(/\r?\n/);
+    pending = lines.pop() || "";
+
+    for (const line of lines) {
+      if (line.trim()) {
+        onLine(line.trim());
+      }
+    }
+  };
 }
 
-function formatStatus(sample) {
-  const { normalized } = sample;
-  const processCount = sample.raw.processCount.toString().padStart(3);
-
-  return [
-    `CPU ${formatPercent(normalized.cpu)}`,
-    `MEM ${formatPercent(normalized.memory)}`,
-    `LOAD ${formatPercent(normalized.load)}`,
-    `PROC ${processCount}`,
-    `LAG ${Math.round(sample.raw.eventLoopLagMs).toString().padStart(3)}ms`,
-  ].join("  ");
-}
-
-function launchSuperCollider(projectRoot, port) {
+function launchSuperCollider(projectRoot, port, onStatus) {
   const sclang = findSclang();
   if (!sclang) {
     throw new Error(
@@ -123,11 +125,30 @@ function launchSuperCollider(projectRoot, port) {
       ...process.env,
       MATERIALITY_OSC_PORT: String(port),
     },
-    stdio: "inherit",
+    stdio: ["ignore", "pipe", "pipe"],
   });
 
+  const handleLine = (line) => {
+    const status = engineStatusFromLine(line);
+
+    if (status) {
+      onStatus(status);
+    }
+
+    if (!process.stdout.isTTY) {
+      process.stdout.write(`[sc] ${line}\n`);
+    }
+  };
+  const readStdout = createLineReader(handleLine);
+  const readStderr = createLineReader(handleLine);
+
+  child.stdout.on("data", readStdout);
+  child.stderr.on("data", readStderr);
   child.on("error", (error) => {
-    console.error(`Could not start SuperCollider: ${error.message}`);
+    onStatus({
+      phase: "error",
+      detail: `Could not start SuperCollider: ${error.message}`,
+    });
   });
 
   return child;
@@ -139,6 +160,7 @@ async function run(options) {
   const socket = dgram.createSocket("udp4");
   const sessionDirectory = path.join(projectRoot, "sessions");
   let recorder = null;
+  let sessionPath = null;
   let superCollider = null;
   let timer = null;
   let sampleCount = 0;
@@ -148,16 +170,34 @@ async function run(options) {
 
   if (options.record) {
     fs.mkdirSync(sessionDirectory, { recursive: true });
-    const sessionPath = path.join(sessionDirectory, sessionFileName());
+    sessionPath = path.join(sessionDirectory, sessionFileName());
     recorder = fs.createWriteStream(sessionPath, { encoding: "utf8" });
-    console.log(`Session: ${path.relative(projectRoot, sessionPath)}`);
   }
 
+  const dashboard = new TerminalDashboard({
+    stream: process.stdout,
+    port: options.port,
+    session: sessionPath
+      ? path.relative(projectRoot, sessionPath)
+      : "recording disabled",
+    audio: options.audio,
+  });
+
   if (options.audio) {
-    superCollider = launchSuperCollider(projectRoot, options.port);
-    console.log(`OSC: 127.0.0.1:${options.port}`);
+    dashboard.setEngine({
+      phase: "starting",
+      detail: "compiling SuperCollider class library",
+    });
+    superCollider = launchSuperCollider(
+      projectRoot,
+      options.port,
+      (status) => dashboard.setEngine(status),
+    );
   } else {
-    console.log("Audio: disabled");
+    dashboard.setEngine({
+      phase: "disabled",
+      detail: "telemetry only",
+    });
   }
 
   const stop = (exitCode = 0) => {
@@ -170,8 +210,11 @@ async function run(options) {
       clearInterval(timer);
     }
 
-    process.stdout.write("\n");
-    socket.close();
+    try {
+      socket.close();
+    } catch {
+      // The UDP socket may never have been bound in telemetry-only mode.
+    }
 
     if (recorder) {
       recorder.end();
@@ -181,15 +224,21 @@ async function run(options) {
       superCollider.kill("SIGTERM");
     }
 
+    dashboard.stop(
+      exitCode === 0
+        ? "Stopped listening."
+        : "Stopped after an error. Check the engine status above.",
+    );
     process.exitCode = exitCode;
   };
 
   if (superCollider) {
     superCollider.on("exit", (code, signal) => {
       if (!stopping) {
-        console.error(
-          `\nSuperCollider stopped unexpectedly (${signal || code}).`,
-        );
+        dashboard.setEngine({
+          phase: "error",
+          detail: `SuperCollider stopped unexpectedly (${signal || code})`,
+        });
         stop(1);
       }
     });
@@ -233,20 +282,22 @@ async function run(options) {
       }
 
       sampleCount += 1;
-      process.stdout.write(`\r${formatStatus(sample)}`);
+      dashboard.update(sample);
 
       if (options.samples !== null && sampleCount >= options.samples) {
         stop(0);
       }
     } catch (error) {
-      console.error(`\nTelemetry error: ${error.message}`);
+      dashboard.setEngine({
+        phase: "error",
+        detail: `Telemetry error: ${error.message}`,
+      });
       stop(1);
     } finally {
       sampling = false;
     }
   };
 
-  console.log("Listening to the machine. Press Ctrl+C to stop.\n");
   await tick();
 
   if (!stopping) {
@@ -284,6 +335,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  createLineReader,
   formatStatus,
   parseArguments,
   positiveInteger,
