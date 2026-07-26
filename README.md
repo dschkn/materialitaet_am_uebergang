@@ -3,16 +3,32 @@
 A process-based composition in which a laptop listens to its own internal
 activity and turns the conditions of computation into sound.
 
-**Concept and implementation: [dschkn](https://github.com/dschkn)**
+The original idea behind this project belongs to my dear friend and colleague
+[Luis Maximilian Küffner](https://github.com/user4-33), whose
+*Materialität am Übergang* provided its theoretical and artistic point of
+departure. I wrote this repository as my own version on top of his work: an
+independent extension and reinterpretation for live system telemetry and
+SuperCollider.
 
-## Run
+**Version and implementation: [dschkn](https://github.com/dschkn)**
+
+## Installation and launch
 
 Requirements:
 
 - Node.js 18 or newer
 - SuperCollider 3
 
-Check the installation:
+Clone the repository, enter its directory, and switch to the finished prototype
+branch:
+
+```bash
+git clone git@github.com:dschkn/materialitaet_am_uebergang.git
+cd materialitaet_am_uebergang
+git switch prototype/system-listening-v0.1
+```
+
+Check that Node.js and SuperCollider are available:
 
 ```bash
 npm run doctor
@@ -24,8 +40,19 @@ Start the piece with one command:
 npm start
 ```
 
-On macOS, `start.command` can also be opened directly from Finder. Stop the
-piece with `Ctrl+C`.
+The terminal becomes a live dashboard once the piece starts. Press `Ctrl+C` at
+any time to stop both the telemetry bridge and SuperCollider cleanly.
+
+To update an existing local copy before launching it:
+
+```bash
+git switch prototype/system-listening-v0.1
+git pull
+npm run doctor
+npm start
+```
+
+On macOS, `start.command` can also be opened directly from Finder.
 
 No npm dependencies are required. The launcher finds `sclang` in the usual
 macOS and Linux locations. A custom installation can be selected like this:
@@ -36,10 +63,9 @@ SCLANG_PATH="/path/to/sclang" npm start
 
 Keep the output volume low on the first run.
 
-While the piece runs, the terminal becomes a live dashboard. It shows the raw
-machine state and the sounding processes produced from it: drone and hum
-frequencies, click density, noise brightness, active voices, pulse, drift, and
-recent structural changes.
+The dashboard shows both the raw machine state and the sounding processes
+produced from it: drone and hum frequencies, click density, noise brightness,
+active voices, pulse, drift, and recent structural changes.
 
 ## What happens
 
@@ -74,17 +100,18 @@ ignored by Git by default.
 
 ## Theoretical point of departure
 
-The project begins from Luis Küffner's *Materialität am Übergang* and its
-discussion of hylomorphic and process-based composition. A hylomorphic model
-treats material as something passive onto which a prior form is imposed. A
-processual model instead understands form, material, technical environment,
+The project begins from Luis Maximilian Küffner's *Materialität am Übergang*
+and its discussion of hylomorphic and process-based composition. A hylomorphic
+model treats material as something passive onto which a prior form is imposed.
+A processual model instead understands form, material, technical environment,
 and perception as forces that transform one another while a work comes into
 being.
 
-This repository is an independent artistic and technical realization of that
-starting idea. It does not reproduce Küffner's SuperCollider examples.
-Version 0.1 builds a small, bounded feedback system in which the sounding
-result is coupled to the material conditions of its own computation.
+This repository is my independent artistic and technical version of that
+starting idea, written on top of Küffner's work rather than as a reproduction
+of his SuperCollider examples. It builds a small, bounded feedback system in
+which the sounding result is coupled to the material conditions of its own
+computation.
 
 The longer conceptual note is in [docs/concept.md](docs/concept.md).
 
@@ -116,11 +143,7 @@ npm run telemetry
 
 ## Status
 
-This is the first working prototype. The next stage will add deterministic
-session replay and two directly comparable composition modes:
-
-1. **Imposed Form** — fixed mappings and predetermined development.
-2. **Co-Individuation** — adaptive relations, thresholds, and feedback.
-
-That comparison will use the same telemetry recording in both modes, making
-the difference between an imposed form and an emergent process audible.
+Version 0.1 is complete. It is a self-contained composition prototype with
+one-command launch, live telemetry, OSC communication, a SuperCollider sound
+engine, a terminal dashboard, session recording, and automated tests for the
+Node.js bridge.
