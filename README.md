@@ -6,8 +6,8 @@ A process-based composition in which a laptop listens to its own internal
 activity and turns the conditions of computation into sound.
 
 The original idea behind this project belongs to my very dear friend and
-colleague [Luis Maximilian Küffner](https://github.com/user4-33), whose
-bachelor's report *Materialität am Übergang* provides its theoretical and
+colleague [Luis Küffner](https://luiskueffner.com), whose bachelor's report
+[*Materialität am Übergang*](https://www.researchgate.net/publication/413987749_Materialitat_am_Ubergang_Individuieren_einer_kompositorischen_Praxis) provides its theoretical and
 artistic point of departure.
 
 In this work, Küffner reflects on a broader understanding of composition.
@@ -101,18 +101,21 @@ a subharmonic hum, filtered rumble, pink-noise rustle, short resonant clicks,
 and quiet sine objects. The mappings are continuous, so the sound field changes
 without turning every telemetry sample into a new note.
 
-The crucial relation is circular. SuperCollider and `scsynth` contribute to
-the CPU activity that the bridge measures. When the machine has headroom, the
-piece grows more voices; when it becomes busy, the texture thins out. The
-computer is therefore not only a source of data or a neutral playback device.
-It participates in the conditions from which the form emerges.
+The crucial relation is circular, giving the piece an explicitly cybernetic
+dimension: it observes part of its own state and modifies its behaviour in
+response. SuperCollider and `scsynth` contribute to the CPU activity that the
+bridge measures. When the machine has headroom, the piece grows more voices;
+when it becomes busy, the texture thins out. The computer is therefore not only
+a source of data or a neutral playback device. It participates in the
+conditions from which the form emerges.
 
 Every run is recorded as a local JSONL file in `sessions/`. These files are
 ignored by Git by default.
 
 ## Theoretical point of departure
 
-The project begins from Luis Maximilian Küffner's *Materialität am Übergang*
+The project begins from Luis Küffner's
+[*Materialität am Übergang*](https://www.researchgate.net/publication/413987749_Materialitat_am_Ubergang_Individuieren_einer_kompositorischen_Praxis)
 and its discussion of hylomorphic and process-based composition. A hylomorphic
 model treats material as something passive onto which a prior form is imposed.
 A processual model instead understands form, material, technical environment,
@@ -163,7 +166,7 @@ Node.js bridge.
 ## Authorship and copyright
 
 The original report *Materialität am Übergang*, its text, and Küffner's original
-examples remain © Luis Maximilian Küffner.
+examples remain © Luis Küffner.
 
 The software implementation in this repository, terminal interface,
 system-sonification design, sound engine, and accompanying documentation are
