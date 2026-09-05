@@ -122,6 +122,63 @@ A processual model instead understands form, material, technical environment,
 and perception as forces that transform one another while a work comes into
 being.
 
+Küffner develops this argument not only philosophically, but also through small
+SuperCollider examples. The following excerpts are transcribed from the report
+and lightly normalized for SuperCollider syntax.
+
+A first example names a continuously running sound process `material`:
+
+```supercollider
+Ndef(\material, {
+    SinOsc.ar([440, 441], mul: 0.25)
+}).play;
+```
+
+Two almost identical sine frequencies produce a slow beating pattern. The
+important point is not the complexity of the sound, but the way the example
+frames material as something active in time: it is already oscillating,
+interacting and producing perceptible behaviour rather than waiting passively
+to receive a finished form.
+
+A second example introduces an explicit temporal process:
+
+```supercollider
+(
+Tdef(\form, {
+    loop {
+        SynthDef(\sound, {
+            Out.ar(0,
+                SinOsc.ar(
+                    freq: [440, rrand(440, 880), rrand(440, 880)],
+                    mul: 0.25
+                ) * Env.perc().kr(doneAction: 2)
+            )
+        }).play;
+
+        0.5.wait;
+    }
+}).play;
+)
+```
+
+Here the `Tdef` repeatedly creates short sounding events. One frequency remains
+fixed while two others are chosen again within a range, and an envelope gives
+each event a finite lifetime. Form therefore appears less as a static container
+and more as a procedure: a rule that unfolds, repeats and produces different
+concrete states while it runs.
+
+These compact examples are an important bridge to the present project. Küffner
+moves the discussion from fixed musical objects toward processes whose behaviour
+only becomes fully concrete in execution. This repository continues that move,
+but shifts part of the determining process outside the SuperCollider score
+itself. CPU activity, memory, system load, running processes, battery state and
+telemetry timing become conditions to which the sounding system responds.
+
+The step is therefore from **process as programmed behaviour** to **process as a
+coupling between program and machine**. The code no longer specifies every
+relevant condition from within itself. The computer on which it runs contributes
+its own changing state, and that state feeds back into the composition.
+
 This repository is my independent artistic and technical version of that
 starting idea, written on top of Küffner's work rather than as a reproduction
 of his SuperCollider examples. It builds a small, bounded feedback system in
