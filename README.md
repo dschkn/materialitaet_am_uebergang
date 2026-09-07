@@ -76,7 +76,7 @@ SCLANG_PATH="/path/to/sclang" npm run track1
 To record the track, install `ffmpeg` and run:
 
 ```bash
-npm run record
+npm run track1 plusrecord
 ```
 
 Press `Ctrl+C` to finish. The stereo MP3 is saved in a `records/` directory

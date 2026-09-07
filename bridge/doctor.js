@@ -29,7 +29,9 @@ if (sclang) {
 if (ffmpeg) {
   console.log(`✓ MP3 recording: ${ffmpeg}`);
 } else {
-  console.log("! ffmpeg was not found (required only for `npm run record`)");
+  console.log(
+    "! ffmpeg was not found (required only for `npm run track1 plusrecord`)",
+  );
 }
 
 if (!failed) {

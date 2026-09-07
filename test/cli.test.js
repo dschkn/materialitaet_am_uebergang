@@ -17,7 +17,7 @@ test("CLI uses live audio and recording by default", () => {
 test("CLI accepts bounded test and telemetry options", () => {
   const options = parseArguments([
     "--no-audio",
-    "--record",
+    "plusrecord",
     "--no-record",
     "--samples",
     "3",

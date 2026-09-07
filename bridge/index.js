@@ -23,11 +23,11 @@ Materialität am Übergang
 
 Usage:
   npm run track1
-  npm run record
+  npm run track1 plusrecord
   node bridge/index.js [options]
 
 Options:
-  --record         Record the patch output as MP3 until Ctrl+C
+  plusrecord       Record the patch output as MP3 until Ctrl+C
   --no-audio       Collect telemetry without launching SuperCollider
   --no-record      Do not write a JSONL session file
   --samples N      Stop after N telemetry samples
@@ -60,6 +60,7 @@ function parseArguments(argv) {
     const argument = argv[index];
 
     switch (argument) {
+      case "plusrecord":
       case "--record":
         options.audioRecord = true;
         break;
@@ -235,7 +236,7 @@ async function run(options) {
     ffmpeg = findOnPath("ffmpeg");
     if (!ffmpeg) {
       throw new Error(
-        "ffmpeg was not found. Install it before using `npm run record`.",
+        "ffmpeg was not found. Install it before using `npm run track1 plusrecord`.",
       );
     }
 
