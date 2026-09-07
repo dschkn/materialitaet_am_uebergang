@@ -5,24 +5,62 @@ const color = {
   reset: "\x1b[0m",
   bold: "\x1b[1m",
   white: "\x1b[38;5;255m",
+  green: "\x1b[38;5;82m",
   yellow: "\x1b[38;5;220m",
+  red: "\x1b[38;5;203m",
   purple: "\x1b[38;5;98m",
   blue: "\x1b[38;5;67m",
   gray: "\x1b[38;5;245m",
 };
 
 const items = [
-  { label: "Track 1", status: "ready · stopped", color: color.yellow },
-  { label: "Track 2", status: "comes later", color: color.purple },
-  { label: "Track 3", status: "comes later", color: color.purple },
-  { label: "Track 4", status: "comes later", color: color.purple },
-  { label: "Track 5", status: "comes later", color: color.purple },
+  {
+    label: "Track 1",
+    color: color.gray,
+    status: [
+      { text: "prepared", color: color.yellow },
+      { text: " · ", color: color.gray },
+      { text: "stopped", color: color.red },
+    ],
+  },
+  {
+    label: "Track 2",
+    color: color.gray,
+    status: [{ text: "comes later", color: color.purple }],
+  },
+  {
+    label: "Track 3",
+    color: color.gray,
+    status: [{ text: "comes later", color: color.purple }],
+  },
+  {
+    label: "Track 4",
+    color: color.gray,
+    status: [{ text: "comes later", color: color.purple }],
+  },
+  {
+    label: "Track 5",
+    color: color.gray,
+    status: [{ text: "comes later", color: color.purple }],
+  },
   { separator: true },
-  { label: "Channel routing", status: "planned", color: color.blue },
-  { label: "Sound layers", status: "planned", color: color.blue },
-  { label: "Output channels", status: "planned", color: color.blue },
+  {
+    label: "Channel routing",
+    status: [{ text: "planned", color: color.blue }],
+    color: color.blue,
+  },
+  {
+    label: "Sound layers",
+    status: [{ text: "planned", color: color.blue }],
+    color: color.blue,
+  },
+  {
+    label: "Output channels",
+    status: [{ text: "planned", color: color.blue }],
+    color: color.blue,
+  },
   { separator: true },
-  { label: "Exit", status: "", color: color.gray },
+  { label: "Exit", status: [], color: color.gray },
 ];
 
 const selectableItems = items
@@ -46,8 +84,11 @@ function render() {
     }
 
     const marker = index === selected ? "›" : " ";
+    const status = item.status
+      .map(({ text, color: statusColor }) => `${statusColor}${text}`)
+      .join("");
     process.stdout.write(
-      `${item.color}${marker} ${item.label.padEnd(22)} ${item.status}${color.reset}\n`,
+      `${color.white}${marker} ${item.color}${item.label.padEnd(22)} ${status}${color.reset}\n`,
     );
   });
 
