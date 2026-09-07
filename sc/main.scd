@@ -1,6 +1,7 @@
 (
 var telemetryPort = 57121;
 var portFromEnvironment = "MATERIALITY_OSC_PORT".getenv;
+var recordingPath = "MATERIALITY_RECORDING_PATH".getenv;
 var maxVoices = 6;
 
 if(portFromEnvironment.notNil, {
@@ -214,6 +215,25 @@ s.waitForBoot({
         "/materiality/system",
         recvPort: telemetryPort
     );
+
+    if(recordingPath.notNil, {
+        s.record(path: recordingPath);
+
+        OSCdef(
+            \materialityRecordStop,
+            {
+                fork {
+                    s.stopRecording;
+                    0.25.wait;
+                    0.exit;
+                };
+            },
+            "/materiality/record/stop",
+            recvPort: telemetryPort
+        );
+
+        "Recording patch output to %.".format(recordingPath).postln;
+    });
 
     "Materialität audio engine online — OSC port %."
         .format(telemetryPort)

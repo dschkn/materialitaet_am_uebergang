@@ -26,6 +26,7 @@ Usage:
   node bridge/index.js [options]
 
 Options:
+  --record         Record the patch output to recordings/ until Ctrl+C
   --no-audio       Collect telemetry without launching SuperCollider
   --no-record      Do not write a JSONL session file
   --samples N      Stop after N telemetry samples
@@ -46,6 +47,7 @@ function positiveInteger(value, flag) {
 function parseArguments(argv) {
   const options = {
     audio: true,
+    audioRecord: false,
     record: true,
     samples: null,
     interval: DEFAULT_INTERVAL,
@@ -57,6 +59,9 @@ function parseArguments(argv) {
     const argument = argv[index];
 
     switch (argument) {
+      case "--record":
+        options.audioRecord = true;
+        break;
       case "--no-audio":
         options.audio = false;
         break;
@@ -110,7 +115,7 @@ function createLineReader(onLine) {
   };
 }
 
-function launchSuperCollider(projectRoot, port, onStatus) {
+function launchSuperCollider(projectRoot, port, recordingPath, onStatus) {
   const sclang = findSclang();
   if (!sclang) {
     throw new Error(
@@ -124,6 +129,9 @@ function launchSuperCollider(projectRoot, port, onStatus) {
     env: {
       ...process.env,
       MATERIALITY_OSC_PORT: String(port),
+      ...(recordingPath
+        ? { MATERIALITY_RECORDING_PATH: recordingPath }
+        : {}),
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -159,8 +167,10 @@ async function run(options) {
   const sampler = new TelemetrySampler();
   const socket = dgram.createSocket("udp4");
   const sessionDirectory = path.join(projectRoot, "sessions");
+  const recordingDirectory = path.join(projectRoot, "recordings");
   let recorder = null;
   let sessionPath = null;
+  let recordingPath = null;
   let superCollider = null;
   let timer = null;
   let sampleCount = 0;
@@ -172,6 +182,14 @@ async function run(options) {
     fs.mkdirSync(sessionDirectory, { recursive: true });
     sessionPath = path.join(sessionDirectory, sessionFileName());
     recorder = fs.createWriteStream(sessionPath, { encoding: "utf8" });
+  }
+
+  if (options.audioRecord) {
+    fs.mkdirSync(recordingDirectory, { recursive: true });
+    recordingPath = path.join(
+      recordingDirectory,
+      sessionFileName().replace(/\.jsonl$/, ".wav"),
+    );
   }
 
   const dashboard = new TerminalDashboard({
@@ -191,6 +209,7 @@ async function run(options) {
     superCollider = launchSuperCollider(
       projectRoot,
       options.port,
+      recordingPath,
       (status) => dashboard.setEngine(status),
     );
   } else {
@@ -200,7 +219,7 @@ async function run(options) {
     });
   }
 
-  const stop = (exitCode = 0) => {
+  const stop = async (exitCode = 0) => {
     if (stopping) {
       return;
     }
@@ -210,18 +229,35 @@ async function run(options) {
       clearInterval(timer);
     }
 
-    try {
-      socket.close();
-    } catch {
-      // The UDP socket may never have been bound in telemetry-only mode.
-    }
-
     if (recorder) {
       recorder.end();
     }
 
     if (superCollider && !superCollider.killed) {
-      superCollider.kill("SIGTERM");
+      if (recordingPath) {
+        try {
+          await sendOscMessage(
+            socket,
+            "127.0.0.1",
+            options.port,
+            "/materiality/record/stop",
+            [],
+          );
+          await new Promise((resolve) => setTimeout(resolve, 750));
+        } catch {
+          // Fall through to terminating SuperCollider below.
+        }
+      }
+
+      if (!superCollider.killed) {
+        superCollider.kill("SIGTERM");
+      }
+    }
+
+    try {
+      socket.close();
+    } catch {
+      // The UDP socket may never have been bound in telemetry-only mode.
     }
 
     dashboard.stop(
@@ -244,8 +280,8 @@ async function run(options) {
     });
   }
 
-  process.once("SIGINT", () => stop(0));
-  process.once("SIGTERM", () => stop(0));
+  process.once("SIGINT", () => void stop(0));
+  process.once("SIGTERM", () => void stop(0));
 
   const tick = async () => {
     if (sampling || stopping) {
@@ -285,14 +321,14 @@ async function run(options) {
       dashboard.update(sample);
 
       if (options.samples !== null && sampleCount >= options.samples) {
-        stop(0);
+        await stop(0);
       }
     } catch (error) {
       dashboard.setEngine({
         phase: "error",
         detail: `Telemetry error: ${error.message}`,
       });
-      stop(1);
+      await stop(1);
     } finally {
       sampling = false;
     }

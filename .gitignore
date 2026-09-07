@@ -3,3 +3,5 @@ node_modules/
 npm-debug.log*
 sessions/*.jsonl
 !sessions/.gitkeep
+recordings/*
+!recordings/.gitkeep

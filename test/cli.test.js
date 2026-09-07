@@ -8,6 +8,7 @@ test("CLI uses live audio and recording by default", () => {
   const options = parseArguments([]);
 
   assert.equal(options.audio, true);
+  assert.equal(options.audioRecord, false);
   assert.equal(options.record, true);
   assert.equal(options.port, 57121);
   assert.equal(options.interval, 1000);
@@ -16,6 +17,7 @@ test("CLI uses live audio and recording by default", () => {
 test("CLI accepts bounded test and telemetry options", () => {
   const options = parseArguments([
     "--no-audio",
+    "--record",
     "--no-record",
     "--samples",
     "3",
@@ -27,6 +29,7 @@ test("CLI accepts bounded test and telemetry options", () => {
 
   assert.deepEqual(options, {
     audio: false,
+    audioRecord: true,
     record: false,
     samples: 3,
     interval: 250,
