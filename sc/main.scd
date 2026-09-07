@@ -217,7 +217,7 @@ s.waitForBoot({
     );
 
     if(recordingPath.notNil, {
-        s.record(path: recordingPath);
+        s.record(path: recordingPath, numChannels: 2);
 
         OSCdef(
             \materialityRecordStop,

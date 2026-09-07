@@ -6,6 +6,7 @@
   "author": "dschkn",
   "scripts": {
     "start": "node bridge/index.js",
+    "track1": "node bridge/index.js",
     "record": "node bridge/index.js --record",
     "doctor": "node bridge/doctor.js",
     "telemetry": "node bridge/index.js --no-audio",

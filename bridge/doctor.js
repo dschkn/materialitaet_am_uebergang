@@ -1,8 +1,9 @@
 "use strict";
 
-const { findSclang } = require("./sclang");
+const { findOnPath, findSclang } = require("./sclang");
 
 const sclang = findSclang();
+const ffmpeg = findOnPath("ffmpeg");
 const nodeMajor = Number(process.versions.node.split(".")[0]);
 let failed = false;
 
@@ -25,8 +26,14 @@ if (sclang) {
   failed = true;
 }
 
+if (ffmpeg) {
+  console.log(`✓ MP3 recording: ${ffmpeg}`);
+} else {
+  console.log("! ffmpeg was not found (required only for `npm run record`)");
+}
+
 if (!failed) {
-  console.log("\nReady. Run: npm start");
+  console.log("\nReady. Run: npm run track1");
 }
 
 process.exitCode = failed ? 1 : 0;

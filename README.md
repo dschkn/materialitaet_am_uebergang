@@ -47,10 +47,10 @@ Check that Node.js and SuperCollider are available:
 npm run doctor
 ```
 
-Start the piece with one command:
+Start track 1 with one command:
 
 ```bash
-npm start
+npm run track1
 ```
 
 The terminal becomes a live dashboard once the piece starts. Press `Ctrl+C` at
@@ -61,7 +61,7 @@ To update an existing local copy before launching it:
 ```bash
 git pull
 npm run doctor
-npm start
+npm run track1
 ```
 
 On macOS, `start.command` can also be opened directly from Finder.
@@ -70,8 +70,17 @@ No npm dependencies are required. The launcher finds `sclang` in the usual
 macOS and Linux locations. A custom installation can be selected like this:
 
 ```bash
-SCLANG_PATH="/path/to/sclang" npm start
+SCLANG_PATH="/path/to/sclang" npm run track1
 ```
+
+To record the track, install `ffmpeg` and run:
+
+```bash
+npm run record
+```
+
+Press `Ctrl+C` to finish. The stereo MP3 is saved in a `records/` directory
+created inside the directory from which the command was launched.
 
 Keep the output volume low on the first run.
 
@@ -193,6 +202,7 @@ The longer conceptual note is in [docs/concept.md](docs/concept.md).
 .
 ├── bridge/             system telemetry, OSC, and process launcher
 ├── sc/main.scd         SuperCollider sound engine
+├── records/            locally rendered stereo MP3 files
 ├── sessions/           local runtime recordings
 ├── test/               Node.js tests
 ├── docs/               concept and architecture

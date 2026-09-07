@@ -12,7 +12,7 @@ const {
   formatStatus,
 } = require("./dashboard");
 const { sendOscMessage } = require("./osc");
-const { findSclang } = require("./sclang");
+const { findOnPath, findSclang } = require("./sclang");
 
 const DEFAULT_PORT = 57121;
 const DEFAULT_INTERVAL = 1000;
@@ -22,11 +22,12 @@ function usage() {
 Materialität am Übergang
 
 Usage:
-  npm start
+  npm run track1
+  npm run record
   node bridge/index.js [options]
 
 Options:
-  --record         Record the patch output to recordings/ until Ctrl+C
+  --record         Record the patch output as MP3 until Ctrl+C
   --no-audio       Collect telemetry without launching SuperCollider
   --no-record      Do not write a JSONL session file
   --samples N      Stop after N telemetry samples
@@ -99,6 +100,50 @@ function sessionFileName() {
   return `${new Date().toISOString().replace(/[:.]/g, "-")}.jsonl`;
 }
 
+function recordingFileName(extension) {
+  return `track1-${new Date().toISOString().replace(/[:.]/g, "-")}.${extension}`;
+}
+
+function convertToMp3(ffmpeg, sourcePath, destinationPath) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      ffmpeg,
+      [
+        "-y",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-i",
+        sourcePath,
+        "-codec:a",
+        "libmp3lame",
+        "-q:a",
+        "2",
+        destinationPath,
+      ],
+      { stdio: ["ignore", "ignore", "pipe"] },
+    );
+    let errorOutput = "";
+
+    child.stderr.on("data", (chunk) => {
+      errorOutput += chunk.toString("utf8");
+    });
+    child.on("error", reject);
+    child.on("exit", (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(
+        new Error(
+          `ffmpeg could not create the MP3${errorOutput.trim() ? `: ${errorOutput.trim()}` : "."}`,
+        ),
+      );
+    });
+  });
+}
+
 function createLineReader(onLine) {
   let pending = "";
 
@@ -167,10 +212,12 @@ async function run(options) {
   const sampler = new TelemetrySampler();
   const socket = dgram.createSocket("udp4");
   const sessionDirectory = path.join(projectRoot, "sessions");
-  const recordingDirectory = path.join(projectRoot, "recordings");
+  const recordingDirectory = path.join(process.cwd(), "records");
   let recorder = null;
   let sessionPath = null;
   let recordingPath = null;
+  let mp3Path = null;
+  let ffmpeg = null;
   let superCollider = null;
   let timer = null;
   let sampleCount = 0;
@@ -185,11 +232,16 @@ async function run(options) {
   }
 
   if (options.audioRecord) {
+    ffmpeg = findOnPath("ffmpeg");
+    if (!ffmpeg) {
+      throw new Error(
+        "ffmpeg was not found. Install it before using `npm run record`.",
+      );
+    }
+
     fs.mkdirSync(recordingDirectory, { recursive: true });
-    recordingPath = path.join(
-      recordingDirectory,
-      sessionFileName().replace(/\.jsonl$/, ".wav"),
-    );
+    recordingPath = path.join(recordingDirectory, recordingFileName("wav"));
+    mp3Path = recordingPath.replace(/\.wav$/, ".mp3");
   }
 
   const dashboard = new TerminalDashboard({
@@ -254,6 +306,17 @@ async function run(options) {
       }
     }
 
+    if (recordingPath && mp3Path && fs.existsSync(recordingPath)) {
+      try {
+        await convertToMp3(ffmpeg, recordingPath, mp3Path);
+        fs.unlinkSync(recordingPath);
+      } catch (error) {
+        exitCode = 1;
+        console.error(`\n${error.message}`);
+        console.error(`The stereo WAV was kept at ${recordingPath}`);
+      }
+    }
+
     try {
       socket.close();
     } catch {
@@ -265,6 +328,9 @@ async function run(options) {
         ? "Stopped listening."
         : "Stopped after an error. Check the engine status above.",
     );
+    if (mp3Path && fs.existsSync(mp3Path)) {
+      console.log(`Recording saved: ${mp3Path}`);
+    }
     process.exitCode = exitCode;
   };
 
