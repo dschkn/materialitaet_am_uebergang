@@ -210,18 +210,24 @@ The longer conceptual note is in [docs/concept.md](docs/concept.md).
 └── package.json        one-command entry point
 ```
 
-## Other commands
+## Commands
 
-```bash
-npm test
-npm run smoke
-npm run telemetry
-```
+| Command | Purpose |
+| --- | --- |
+| `npm run track1` | Play track 1 and show its live telemetry dashboard. |
+| `npm run track1 plusrecord` | Play track 1 and save a stereo MP3 to `records/` after `Ctrl+C`. Requires `ffmpeg`. |
+| `npm run console` | Open the interactive live-performance console. Navigate with ↑/↓ and Enter; close with Q or Esc. Channel routing and mixer controls are reserved for future versions. |
+| `npm run doctor` | Check Node.js, SuperCollider, and MP3-recording support. |
+| `npm run telemetry` | Collect telemetry and write a JSONL session without launching SuperCollider. |
+| `npm run smoke` | Collect two quick telemetry samples without sound or session recording. |
+| `npm test` | Run the automated test suite. |
+| `npm start` | Compatibility alias for `npm run track1`. |
 
-- `npm test` runs the bridge unit tests.
-- `npm run smoke` collects two fast samples without sound or recording.
-- `npm run telemetry` listens to the computer and records a session without
-  launching SuperCollider.
+Future compositions will follow the same command pattern: `npm run track2` to
+play and `npm run track2 plusrecord` to record. The live console is intended to
+become a terminal mixing surface for concerts: processes, layers, levels,
+channel routing, and output assignments will be added as the performance setup
+develops.
 
 ## Status
 

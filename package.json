@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node bridge/index.js",
     "track1": "node bridge/index.js",
+    "console": "node bridge/console.js",
     "doctor": "node bridge/doctor.js",
     "telemetry": "node bridge/index.js --no-audio",
     "smoke": "node bridge/index.js --no-audio --samples 2 --interval 250 --no-record",
