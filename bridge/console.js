@@ -1,29 +1,57 @@
 #!/usr/bin/env node
 "use strict";
 
+const color = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  white: "\x1b[38;5;255m",
+  yellow: "\x1b[38;5;220m",
+  purple: "\x1b[38;5;98m",
+  blue: "\x1b[38;5;67m",
+  gray: "\x1b[38;5;245m",
+};
+
 const items = [
-  "Track 1",
-  "Channel routing",
-  "Sound layers",
-  "Output channels",
-  "Exit",
+  { label: "Track 1", status: "ready · stopped", color: color.yellow },
+  { label: "Track 2", status: "comes later", color: color.purple },
+  { label: "Track 3", status: "comes later", color: color.purple },
+  { label: "Track 4", status: "comes later", color: color.purple },
+  { label: "Track 5", status: "comes later", color: color.purple },
+  { separator: true },
+  { label: "Channel routing", status: "planned", color: color.blue },
+  { label: "Sound layers", status: "planned", color: color.blue },
+  { label: "Output channels", status: "planned", color: color.blue },
+  { separator: true },
+  { label: "Exit", status: "", color: color.gray },
 ];
+
+const selectableItems = items
+  .map((item, index) => (item.separator ? null : index))
+  .filter((index) => index !== null);
 
 let selected = 0;
 let note = "Use ↑/↓ and Enter. Press Q or Esc to close.";
 
 function render() {
   process.stdout.write("\x1b[2J\x1b[H");
-  process.stdout.write("MATERIALITÄT AM ÜBERGANG\n");
-  process.stdout.write("LIVE CONSOLE\n\n");
+  process.stdout.write(
+    `${color.bold}${color.white}MATERIALITÄT AM ÜBERGANG${color.reset}\n`,
+  );
+  process.stdout.write(`${color.gray}LIVE CONSOLE${color.reset}\n\n`);
 
   items.forEach((item, index) => {
+    if (item.separator) {
+      process.stdout.write("\n");
+      return;
+    }
+
     const marker = index === selected ? "›" : " ";
-    const status = index === 0 ? "ready" : index === items.length - 1 ? "" : "planned";
-    process.stdout.write(`${marker} ${item.padEnd(22)} ${status}\n`);
+    process.stdout.write(
+      `${item.color}${marker} ${item.label.padEnd(22)} ${item.status}${color.reset}\n`,
+    );
   });
 
-  process.stdout.write(`\n${note}\n`);
+  process.stdout.write(`\n${color.gray}${note}${color.reset}\n`);
 }
 
 function close() {
@@ -35,15 +63,17 @@ function close() {
 }
 
 function select() {
-  if (selected === items.length - 1) {
+  const item = items[selected];
+
+  if (item.label === "Exit") {
     close();
     return;
   }
 
   note =
-    selected === 0
+    item.label === "Track 1"
       ? "Track 1 is ready. Live controls will be connected here later."
-      : `${items[selected]} will be designed for a future performance version.`;
+      : `${item.label} will be designed for a future performance version.`;
   render();
 }
 
@@ -60,12 +90,16 @@ if (!process.stdin.isTTY || !process.stdout.isTTY) {
       return;
     }
     if (key === "\u001b[A") {
-      selected = (selected - 1 + items.length) % items.length;
+      const position = selectableItems.indexOf(selected);
+      selected = selectableItems[
+        (position - 1 + selectableItems.length) % selectableItems.length
+      ];
       render();
       return;
     }
     if (key === "\u001b[B") {
-      selected = (selected + 1) % items.length;
+      const position = selectableItems.indexOf(selected);
+      selected = selectableItems[(position + 1) % selectableItems.length];
       render();
       return;
     }
