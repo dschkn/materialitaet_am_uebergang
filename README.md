@@ -223,6 +223,14 @@ The longer conceptual note is in [docs/concept.md](docs/concept.md).
 | `npm test` | Run the automated test suite. |
 | `npm start` | Compatibility alias for `npm run track1`. |
 
+## Author and use
+
+Copyright © 2026 Dmitrii Shchukin / [boatbehind.online](https://boatbehind.online).
+The patch may be studied, performed, and modified with mandatory attribution.
+Public performances and derivative versions must credit the author. If you
+modify the patch or publish a derivative version, you must notify Dmitrii
+Shchukin. See [LICENSE.md](LICENSE.md) for the complete terms.
+
 Future compositions will follow the same command pattern: `npm run track2` to
 play and `npm run track2 plusrecord` to record. The live console is intended to
 become a terminal mixing surface for concerts: processes, layers, levels,

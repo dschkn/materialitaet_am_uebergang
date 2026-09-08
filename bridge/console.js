@@ -60,6 +60,7 @@ const items = [
     color: color.blue,
   },
   { separator: true },
+  { label: "INFO", status: [], color: color.gray },
   { label: "Exit", status: [], color: color.gray },
 ];
 
@@ -69,8 +70,39 @@ const selectableItems = items
 
 let selected = 0;
 let note = "Use ↑/↓ and Enter. Press Q or Esc to close.";
+let view = "menu";
+
+const infoLines = [
+  "HOW TO USE",
+  "↑ / ↓       move through the menu",
+  "Enter       open or activate an item",
+  "Esc         return to the menu",
+  "Q           close the live console",
+  "",
+  "Track controls and SuperCollider parameters will appear here",
+  "as the performance system develops. This INFO page will evolve",
+  "with every new control and performance mechanism.",
+  "",
+  "AUTHOR & USE",
+  "© 2026 Dmitrii Shchukin / boatbehind.online",
+  "Source-available for study, performance, and modification.",
+  "Public performances and derivative versions must credit the author.",
+  "If you modify the patch, you must notify Dmitrii Shchukin.",
+  "See LICENSE.md for the complete terms.",
+];
+
+function renderInfo() {
+  process.stdout.write("\x1b[2J\x1b[H");
+  process.stdout.write(`${color.gray}MATERIALITÄT AM ÜBERGANG — INFO${color.reset}\n\n`);
+  infoLines.forEach((line) => process.stdout.write(`${color.gray}${line}${color.reset}\n`));
+  process.stdout.write(`\n${color.gray}Press Esc, Enter, or Backspace to return. Q closes the console.${color.reset}\n`);
+}
 
 function render() {
+  if (view === "info") {
+    renderInfo();
+    return;
+  }
   process.stdout.write("\x1b[2J\x1b[H");
   process.stdout.write(
     `${color.bold}${color.white}MATERIALITÄT AM ÜBERGANG${color.reset}\n`,
@@ -111,6 +143,12 @@ function select() {
     return;
   }
 
+  if (item.label === "INFO") {
+    view = "info";
+    render();
+    return;
+  }
+
   note =
     item.label === "Track 1"
       ? "Track 1 is ready. Live controls will be connected here later."
@@ -126,7 +164,19 @@ if (!process.stdin.isTTY || !process.stdout.isTTY) {
   process.stdin.setEncoding("utf8");
   process.stdin.resume();
   process.stdin.on("data", (key) => {
-    if (key === "\u0003" || key === "q" || key === "Q" || key === "\u001b") {
+    if (key === "\u0003" || key === "q" || key === "Q") {
+      close();
+      return;
+    }
+    if (view === "info") {
+      if (key === "\u001b" || key === "\r" || key === "\n" || key === "\u007f" || key === "\b") {
+        view = "menu";
+        note = "Use ↑/↓ and Enter. Press Q or Esc to close.";
+        render();
+      }
+      return;
+    }
+    if (key === "\u001b") {
       close();
       return;
     }
